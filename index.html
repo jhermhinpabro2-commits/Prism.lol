@@ -137,7 +137,7 @@
 <!-- ──────────── LOGIN SCREEN ──────────── -->
 <div id="auth-screen" style="position:fixed;inset:0;background:rgba(0,0,0,0.97);display:flex;align-items:center;justify-content:center;z-index:9999;">
   <div style="background:#12121f;padding:30px;border-radius:20px;box-shadow:0 0 40px rgba(121,40,202,0.25);width:90%;max-width:420px;">
-    <h2 style="color:#fff;text-align:center;margin:0 0 5px 0;font-size:26px;">Prism.lol</h2>
+    <h2 style="color:#fff;text-align:center;margin:0 0 5px 0;font-size:26px;">Welcome to Prism.lol</h2>
     <p style="color:#666;text-align:center;margin:0 0 25px 0;font-size:13px;">Made by Jher</p>
 
     <!-- TABS -->
@@ -146,10 +146,11 @@
       <button id="tab-create" onclick="showAuthTab('create')" style="flex:1;padding:11px;background:transparent;color:#777;border:1px solid #333;border-radius:10px;cursor:pointer;">Create Account</button>
     </div>
 
-    <!-- CREATE ACCOUNT FORM -->
+    <!-- CREATE ACCOUNT — MAY CONFIRM PASSWORD ✅ -->
     <div id="form-create">
       <input type="text" id="new-user" placeholder="Username" style="width:100%;padding:14px;margin-bottom:12px;background:#1e1e2f;border:none;border-radius:10px;color:#fff;font-size:15px;">
-      <input type="password" id="new-pass" placeholder="Password" style="width:100%;padding:14px;margin-bottom:16px;background:#1e1e2f;border:none;border-radius:10px;color:#fff;font-size:15px;">
+      <input type="password" id="new-pass" placeholder="Password" style="width:100%;padding:14px;margin-bottom:12px;background:#1e1e2f;border:none;border-radius:10px;color:#fff;font-size:15px;">
+      <input type="password" id="new-pass-confirm" placeholder="Confirm Password" style="width:100%;padding:14px;margin-bottom:16px;background:#1e1e2f;border:none;border-radius:10px;color:#fff;font-size:15px;">
       <button onclick="doCreateAccount()" style="width:100%;padding:14px;background:linear-gradient(135deg,#7928ca,#ff0080);color:#fff;border:none;border-radius:10px;font-weight:bold;font-size:15px;cursor:pointer;">✨ Create Account</button>
     </div>
 
@@ -168,6 +169,7 @@
     </button>
   </div>
 </div>
+    
 
     
 
@@ -718,10 +720,10 @@ function enterProfile(username) {
   if (saved) profileData = JSON.parse(saved);
   // Call your existing profile load function here
 }
-        let currentUser = null;
+let currentUser = null;
 let profileData = {};
 
-// Switch tabs
+// ─── SWITCH TABS ───
 function showAuthTab(tab) {
   const isSignin = tab === 'signin';
   document.getElementById('form-signin').style.display = isSignin ? 'block' : 'none';
@@ -734,18 +736,22 @@ function showAuthTab(tab) {
   document.getElementById('tab-create').style.border = isSignin ? '1px solid #333' : 'none';
 }
 
-// Create Account → then go to Profile
+// ─── CREATE ACCOUNT + CONFIRM PASSWORD ✅ ───
 function doCreateAccount() {
   const u = document.getElementById('new-user').value.trim();
   const p = document.getElementById('new-pass').value;
+  const p2 = document.getElementById('new-pass-confirm').value;
   
-  if (!u || !p) return alert('❌ Please fill in all fields!');
-  if (u.length < 3) return alert('❌ Username must be at least 3 characters!');
-  if (p.length < 4) return alert('❌ Password must be at least 4 characters!');
+  // Validation
+  if (!u || !p || !p2) return alert('❌ Fill in all fields!');
+  if (u.length < 3) return alert('❌ Username at least 3 characters!');
+  if (p.length < 4) return alert('❌ Password at least 4 characters!');
+  if (p !== p2) return alert('❌ Passwords do not match! Try again.'); // ✅ Match check
   
   const accounts = JSON.parse(localStorage.getItem('prism_accounts') || '{}');
   if (accounts[u]) return alert('❌ Username already exists! Sign in instead.');
   
+  // Save account
   accounts[u] = { password: p };
   localStorage.setItem('prism_accounts', JSON.stringify(accounts));
   localStorage.setItem('prism_active_user', u);
@@ -754,10 +760,12 @@ function doCreateAccount() {
   enterProfile(u);
 }
 
-// Sign In → then go to Profile
+// ─── SIGN IN ✅ ───
 function doSignIn() {
   const u = document.getElementById('login-user').value.trim();
   const p = document.getElementById('login-pass').value;
+  
+  if (!u || !p) return alert('❌ Fill in all fields!');
   
   const accounts = JSON.parse(localStorage.getItem('prism_accounts') || '{}');
   if (!accounts[u]) return alert('❌ Account not found! Create one first.');
@@ -768,34 +776,66 @@ function doSignIn() {
   enterProfile(u);
 }
 
-// Hide login screen & show profile
+// ─── PUMUNTA SA PROFILE ✅ ───
 function enterProfile(username) {
-  // 🔒 Hide login — only show profile after login
+  // Itago ang login screen
   document.getElementById('auth-screen').style.display = 'none';
   
-  // Set user
+  // Set current user
   currentUser = { id: 'local-' + username, name: username, provider: 'local' };
   
-  // Load saved profile data
+  // Load saved profile
   const saved = localStorage.getItem('profile_' + username);
   if (saved) profileData = JSON.parse(saved);
   
-  // Show profile / edit page
+  // Ipakita ang profile/edit page
   if (typeof loadUser === 'function') loadUser();
   if (typeof renderProfile === 'function') renderProfile();
 }
 
-// Check if already logged in when page loads
-window.addEventListener('load', function() {
-  const activeUser = localStorage.getItem('prism_active_user');
-  if (activeUser) {
-    // Auto-login if already signed in before
-    const accounts = JSON.parse(localStorage.getItem('prism_accounts') || '{}');
-    if (accounts[activeUser]) {
-      enterProfile(activeUser);
+// ─── DISCORD LOGIN → PUMUNTA SA PROFILE ✅ ───
+// Palitan ang lumang discordLogin ng ganito:
+const originalDiscordLogin = window.discordLogin;
+window.discordLogin = async function() {
+  try {
+    // Tawagin ang original Discord login
+    if (originalDiscordLogin) {
+      await originalDiscordLogin();
     }
+    
+    // Kapag nakabalik na may user → pumunta sa profile
+    const checkDiscordUser = setInterval(() => {
+      if (currentUser && currentUser.provider === 'discord') {
+        clearInterval(checkDiscordUser);
+        document.getElementById('auth-screen').style.display = 'none';
+        if (typeof loadUser === 'function') loadUser();
+        if (typeof renderProfile === 'function') renderProfile();
+      }
+    }, 300);
+    
+    // Hintayin hanggang 10 segundo
+    setTimeout(() => clearInterval(checkDiscordUser), 10000);
+    
+  } catch (err) {
+    console.error('Discord login error:', err);
+    alert('❌ Discord login failed. Try again or use Create Account.');
   }
+};
+
+// ─── AUTO LOGIN KUNG NAKA-LOGIN NA ✅ ───
+window.addEventListener('load', function() {
+  // Hintayin sandali bago mag-check
+  setTimeout(() => {
+    const activeUser = localStorage.getItem('prism_active_user');
+    if (activeUser && !currentUser) {
+      const accounts = JSON.parse(localStorage.getItem('prism_accounts') || '{}');
+      if (accounts[activeUser]) {
+        enterProfile(activeUser);
+      }
+    }
+  }, 500);
 });
+        
         
     </script>
     
