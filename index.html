@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Google Sign-in -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Profile</title>
@@ -347,7 +349,7 @@
 // === LOGIN CONFIG ===
 const DISCORD_CLIENT_ID = "1552714741347127337";
 const GOOGLE_CLIENT_ID = "35904855337-0h7ggkf0octlusqlpntk8lsm0gocckqq.apps.googleusercontent.com"; // 📌 Palitan mo ito!
-const REDIRECT_URI = window.location.href;
+const REDIRECT_URI = window.location.origin + window.location.pathname;
 let currentUser = null;
 let profileData = {};
 let isPlaying = false;
@@ -371,20 +373,23 @@ function discordLogin() {
     window.location.href = authUrl;
 }
 
-// --- GOOGLE LOGIN ---
-function googleLogin() {
-    if (GOOGLE_CLIENT_ID === "YOUR_GOOGLE_CLIENT_ID_HERE") {
-        alert("⚠️ Need Google Client ID first!\nGet free at: console.cloud.google.com\nReplace YOUR_GOOGLE_CLIENT_ID_HERE");
-        return;
-    }
+// ──────────── GOOGLE SIGN-IN ────────────
+async function googleLogin() {
+  try {
+    // Buksan ang Google sign-in
     const authUrl = "https://accounts.google.com/o/oauth2/v2/auth"
-        + "?client_id=" + GOOGLE_CLIENT_ID
-        + "&response_type=token"
-        + "&scope=https://www.googleapis.com/auth/userinfo.profile%20https://www.googleapis.com/auth/userinfo.email"
-        + "&redirect_uri=" + encodeURIComponent(REDIRECT_URI)
-        + "&prompt=consent";
+      + "?client_id=35904855337-0h7ggkf0octlusqlpntk8lsm0gocckqq.apps.googleusercontent.com"
+      + "&response_type=token"
+      + "&scope=openid%20email%20profile"
+      + "&redirect_uri=" + encodeURIComponent(window.location.origin + window.location.pathname);
+    
     window.location.href = authUrl;
+  } catch (err) {
+    console.error(err);
+    alert("❌ Google login failed — try Discord instead!");
+  }
 }
+    
 
 // --- READ LOGIN DATA ---
 function getAuthFromUrl() {
