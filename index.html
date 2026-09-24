@@ -732,23 +732,35 @@ function goToProfile(username) {
 
 
 function enterProfile(username) {
-  // Itago ang login screen
-  document.getElementById('auth-screen').style.display = 'none';
+  // 🔴 ITAGO ANG LOGIN SCREEN — SIGURADO NA ITO!
+  const authScreen = document.getElementById('auth-screen');
+  if (authScreen) {
+    authScreen.style.display = 'none';
+    authScreen.style.visibility = 'hidden';
+    authScreen.style.opacity = '0';
+    authScreen.style.zIndex = '-999';
+  }
   
-  // Set current user
+  // Set user
   currentUser = { id: 'local-' + username, name: username, provider: 'local' };
   
-  // Load saved profile data
+  // Load saved profile
   const saved = localStorage.getItem('profile_' + username);
   if (saved) profileData = JSON.parse(saved);
   
-  // ✅ IPakita agad ang PROFILE VIEW, hindi Edit Form
-  document.getElementById('profile-content').style.display = 'block';
-  document.getElementById('settings-panel').style.display = 'none'; // Itago ang Edit form
+  // ✅ IPAKITA ANG PROFILE VIEW
+  const profileView = document.getElementById('profile-content');
+  const editForm = document.getElementById('settings-panel');
   
-  // Ipakita ang profile
-  if (typeof renderProfile === 'function') renderProfile();
-}
+  if (profileView) profileView.style.display = 'block';
+  if (editForm) editForm.style.display = 'none';
+  
+  // Render the profile
+  if (typeof renderProfile === 'function') {
+    renderProfile();
+  }
+        }
+
         
 let currentUser = null;
 let profileData = {};
