@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { min-height: 100vh; overflow: hidden; color: white; }
+
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Oswald:wght@400;700&family=Russo+One&family=Staatliches&display=swap');
+        
+        .font-orbitron { font-family: 'Orbitron', sans-serif; }
+        .font-oswald { font-family: 'Oswald', sans-serif; }
+        .font-russo { font-family: 'Russo One', sans-serif; }
+        .font-staat { font-family: 'Staatliches', cursive; }
+        .font-default { font-family: 'Segoe UI', sans-serif; }
+
+        .bg-container {
+            position: fixed; inset: 0; z-index: -2;
+            background: linear-gradient(135deg, #0f0f1a, #1a1a2e);
+        }
+        #bg-video {
+            width: 100%; height: 100%; object-fit: cover; opacity: 0.6;
+            display: none;
+        }
+        .bg-placeholder {
+            width: 100%; height: 100%;
+            background: linear-gradient(135deg, #1a1a2e, #0f3460);
+        }
+
+        .star {
+            position: absolute; color: white; font-size: 16px; 
+            animation: float 4s infinite ease-in-out; pointer-events: none;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.5; }
+            50% { transform: translateY(-25px) rotate(180deg); opacity: 1; }
+        }
+
+        .text-neon {
+            text-shadow: 0 0 5px currentColor, 0 0 10px currentColor, 
+                         0 0 20px currentColor, 0 0 40px currentColor;
+        }
+        .text-metallic {
+            background: linear-gradient(180deg, #fff, #c0c0c0, #808080, #fff);
+            -webkit-background-clip: text; background-clip: text;
+            color: transparent; filter: drop-shadow(0 0 2px rgba(255,255,255,0.5));
+        }
+
+        .avatar-frame-1 { border: 4px solid; border-radius: 50%; }
+        .avatar-frame-2 { border-radius: 50%; box-shadow: 0 0 0 4px currentColor, 0 0 25px currentColor; }
+        .avatar-frame-3 { border-radius: 50%; border: 4px solid; 
+            background: linear-gradient(45deg, transparent, currentColor, transparent); padding: 4px; }
+        .avatar-frame-4 { border-radius: 50%; position: relative; }
+        .avatar-frame-4::after {
+            content: ''; position: absolute; inset: -6px; border-radius: 50%;
+            background: linear-gradient(45deg, #39ff14, #00ffff, #ff00ff, #39ff14);
+            background-size: 400% 400%; animation: rotateBorder 3s linear infinite; z-index: -1;
+        }
+        @keyframes rotateBorder { 
+            0% { background-position: 0% 50%; } 
+            100% { background-position: 400% 50%; } 
+        }
+
+        .content {
+            position: relative; z-index: 1; display: flex; flex-direction: column;
+            align-items: center; padding: 40px 20px; min-height: 100vh;
+        }
+        .avatar-wrap { position: relative; margin-top: 30px; }
+        .avatar-glow {
+            position: absolute; inset: -8px; border-radius: 50%;
+            filter: blur(10px); opacity: 0.7; z-index: -1;
+        }
+        .avatar {
+            width: 150px; height: 150px; border-radius: 50%;
+            background: #222; display: flex; align-items: center; justify-content: center;
+            font-size: 60px; overflow: hidden; position: relative;
+            border: 2px dashed rgba(255,255,255,0.3);
+        }
+        .avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .avatar-placeholder { color: rgba(255,255,255,0.4); font-size: 16px; text-align: center; }
+
+        .username {
+            margin-top: 25px; font-size: 42px; font-weight: 900; letter-spacing: 2px;
+            color: rgba(255,255,255,0.5);
+        }
+        .title {
+            margin-top: 10px; font-size: 18px; opacity: 0.4; font-style: italic;
+        }
+
+        .info-card {
+            margin-top: 30px; background: rgba(255,255,255,0.08);
+            border-radius: 20px; padding: 20px 25px; backdrop-filter: blur(12px);
+            width: 100%; max-width: 380px; border: 1px solid rgba(255,255,255,0.1);
+        }
+        .info-top { display: flex; align-items: center; gap: 14px; }
+        .mini-avatar {
+            width: 52px; height: 52px; border-radius: 50%; background: #333; overflow: hidden;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+        .mini-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .mini-placeholder { color: rgba(255,255,255,0.3); font-size: 20px; display: flex; align-items: center; justify-content: center; height: 100%; }
+        .info-text { flex: 1; }
+        .info-line1 { font-weight: bold; font-size: 17px; color: rgba(255,255,255,0.4); }
+        .info-line2 { font-size: 14px; opacity: 0.4; margin-top: 4px; }
+
+        .socials { display: flex; gap: 24px; margin-top: 25px; align-items: center; }
+        .socials span { cursor: pointer; transition: 0.3s; color: rgba(255,255,255,0.3); }
+        .socials span:hover { transform: scale(1.2); color: white; }
+        .socials svg { width: 36px; height: 36px; fill: currentColor; }
+
+        .stats-bar {
+            display: flex; align-items: center; gap: 25px; margin-top: 25px;
+            font-size: 16px; opacity: 0.7;
+        }
+        .like-btn {
+            display: flex; align-items: center; gap: 6px; cursor: pointer; transition: 0.2s;
+        }
+        .like-btn:hover { transform: scale(1.1); }
+        .like-btn.liked span { color: #ff4757; }
+
+        .music-card {
+            margin-top: 25px; background: rgba(255,255,255,0.08);
+            border-radius: 20px; padding: 18px 22px; backdrop-filter: blur(12px);
+            width: 100%; max-width: 380px; display: flex; align-items: center; gap: 14px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .music-icon { font-size: 30px; opacity: 0.4; }
+        .music-info { flex: 1; }
+        .music-name { font-weight: bold; font-size: 16px; color: rgba(255,255,255,0.4); }
+        .music-duration { font-size: 12px; opacity: 0.4; margin-top: 3px; }
+        .play-btn {
+            width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.2);
+            color: white; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-weight: bold; font-size: 20px; user-select: none;
+            transition: transform 0.2s;
+        }
+        .play-btn:hover { transform: scale(1.05); }
+        .progress-bar {
+            width: 100%; height: 4px; background: rgba(255,255,255,0.15);
+            border-radius: 2px; margin-top: 10px;
+        }
+        .progress-fill {
+            height: 100%; background: rgba(255,255,255,0.5); border-radius: 2px; transition: width 0.3s linear;
+        }
+
+        .edit-toggle {
+            position: fixed; top: 15px; right: 15px; background: rgba(0,0,0,0.5);
+            border: none; color: white; padding: 10px 16px; border-radius: 24px;
+            cursor: pointer; z-index: 100; backdrop-filter: blur(10px);
+        }
+        .settings-panel {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 99;
+            display: none; overflow-y: auto; padding: 30px 20px;
+        }
+        .settings-inner {
+            max-width: 420px; margin: 0 auto; background: #12121f;
+            padding: 25px; border-radius: 16px;
+        }
+        .settings-inner h3 { margin-bottom: 18px; color: white; text-align: center; }
+        .settings-inner label { display: block; margin-top: 12px; font-size: 13px; color: #aaa; }
+        .settings-inner input, .settings-inner select {
+            width: 100%; padding: 12px; margin: 6px 0;
+            background: #1e1e2f; border: none; border-radius: 8px;
+            color: white; font-size: 14px;
+        }
+        .settings-btns { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+        .btn-row { display: flex; gap: 10px; }
+        .save-btn { flex: 1; padding: 13px; background: linear-gradient(45deg, #39ff14, #00ff9d);
+            border: none; border-radius: 8px; color: black; font-weight: bold; cursor: pointer; }
+        .reset-btn { padding: 13px; background: #ff4757;
+            border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; }
+        .close-btn { flex: 1; padding: 13px; background: #333;
+            border: none; border-radius: 8px; color: white; cursor: pointer; }
+
+        /* LOGIN SCREEN */
+        .auth-screen {
+            position: fixed; inset: 0; background: #000; z-index: 200;
+            display: flex; align-items: center; justify-content: center; padding: 20px;
+        }
+        .auth-screen.hidden { display: none; }
+        .auth-card {
+            background: #12121f; border-radius: 24px; padding: 40px 30px;
+            width: 100%; max-width: 400px; border: 1px solid #2a2a4a;
+            text-align: center;
+        }
+        .auth-icon { font-size: 48px; margin-bottom: 15px; }
+        .auth-heading { font-size: 28px; font-weight: bold; margin-bottom: 8px; }
+        .auth-desc { color: #888; margin-bottom: 25px; }
+        .login-btn {
+            border: none; padding: 14px 24px; border-radius: 12px;
+            font-size: 16px; font-weight: bold; cursor: pointer;
+            width: 100%; transition: transform 0.2s; margin: 8px 0;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .login-btn:hover { transform: scale(1.03); }
+        .discord-btn { background: #5865F2; color: white; }
+        .google-btn { background: #fff; color: #333; }
+        .logout-btn {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: #ef4444; color: white; border: none; padding: 10px 20px;
+            border-radius: 8px; cursor: pointer; font-weight: bold; z-index: 50;
+        }
+    </style>
+</head>
+<body>
+
+<div class="auth-screen" id="auth-screen">
+    <div class="auth-card">
+        <div class="auth-icon">🔐</div>
+        <h1 class="auth-heading">Welcome</h1>
+        <p class="auth-desc">Choose how to sign in</p>
+        <button class="login-btn discord-btn" onclick="discordLogin()">
+            🎮 Login with Discord
+        </button>
+        <button class="login-btn google-btn" onclick="googleLogin()">
+            📧 Login with Google
+        </button>
+    </div>
+</div>
+
+<div class="bg-container">
+    <video id="bg-video" loop muted playsinline autoplay></video>
+    <div class="bg-placeholder" id="bg-placeholder"></div>
+</div>
+
+<div id="stars-container"></div>
+
+<button class="edit-toggle" id="edit-toggle" style="display:none;" onclick="toggleSettings()">⚙ Edit Profile</button>
+<button class="logout-btn" id="logout-btn" style="display:none;" onclick="logout()">🚪 Logout</button>
+
+<div class="settings-panel" id="settings-panel">
+    <div class="settings-inner">
+        <h3>✏ Customize Your Profile</h3>
+        <label>🎬 Background Video URL</label>
+        <input type="text" id="in-bg-video" placeholder="Paste video link (MP4)">
+        <label>🖼 Profile Picture URL</label>
+        <input type="text" id="in-avatar" placeholder="Leave blank to use account photo">
+        <label>✍ Display Name</label>
+        <input type="text" id="in-username" placeholder="Enter your name">
+        <label>💬 Motto / Title</label>
+        <input type="text" id="in-title" placeholder="Your motto">
+        <label>📌 Info Line 1</label>
+        <input type="text" id="in-info1" placeholder="e.g. Your role">
+        <label>✨ Info Line 2</label>
+        <input type="text" id="in-info2" placeholder="e.g. Quote">
+        <label>🎵 Music URL</label>
+        <input type="text" id="in-music-url" placeholder="Paste MP3 link">
+        <label>🎶 Song Name</label>
+        <input type="text" id="in-music-name" placeholder="Song title">
+        <label>🎨 Main Color</label>
+        <input type="color" id="in-main-color" value="#00ff88">
+        <label>✨ Text Effect</label>
+        <select id="in-text-effect">
+            <option value="none">None</option>
+            <option value="neon">Neon Glow ✨</option>
+            <option value="metallic">Metallic Chrome 💿</option>
+        </select>
+        <label>🔤 Font Style</label>
+        <select id="in-font-style">
+            <option value="orbitron">Orbitron — Futuristic 🚀</option>
+            <option value="russo">Russo One — Bold ⚡</option>
+            <option value="oswald">Oswald — Tall 🔥</option>
+            <option value="staat">Staatliches — Modern ✨</option>
+            <option value="default">Default — Clean ✅</option>
+        </select>
+        <label>🖼 Avatar Frame</label>
+        <select id="in-frame-style">
+            <option value="4">Rainbow Glow 🌈</option>
+            <option value="1">Solid Border ⬜</option>
+            <option value="2">Neon Glow Ring 💡</option>
+            <option value="3">Gradient Border 🎨</option>
+        </select>
+        <label>💬 Discord Link</label>
+        <input type="text" id="in-discord" placeholder="Your Discord link">
+        <label>🎵 TikTok Link</label>
+        <input type="text" id="in-tiktok" placeholder="Your TikTok link">
+        <div class="settings-btns">
+            <div class="btn-row">
+                <button class="close-btn" onclick="toggleSettings()">Close</button>
+                <button class="save-btn" onclick="saveProfile()">💾 Save & Apply</button>
+            </div>
+            <button class="reset-btn" onclick="resetProfile()">🔄 Reset</button>
+        </div>
+    </div>
+</div>
+<div class="content" id="profile-content" style="display:none;">
+    <div class="avatar-wrap">
+        <div class="avatar-glow" id="avatar-glow"></div>
+        <div class="avatar" id="avatar">
+            <span class="avatar-placeholder">Loading...</span>
+        </div>
+    </div>
+
+    <h1 class="username" id="username">Username</h1>
+    <p class="title" id="title">Title / Motto</p>
+
+    <div class="info-card">
+        <div class="info-top">
+            <div class="mini-avatar" id="mini-avatar">
+                <span class="mini-placeholder">?</span>
+            </div>
+            <div class="info-text">
+                <div class="info-line1" id="info1">Info Line 1</div>
+                <div class="info-line2" id="info2">Info Line 2</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="socials">
+        <span id="discord-icon" title="Discord">
+            <svg viewBox="0 0 24 24">
+                <path d="M19.27 5.33C17.63 4.71 15.91 4.25 14.13 4L13.45 5.53C11.63 5.22 9.77 5.22 7.93 5.53L7.25 4C5.47 4.25 3.75 4.71 2.11 5.33C1.27 7.52 0.75 9.78 0.58 12.08C0.58 14.58 1.08 17.08 2.08 19.58C3.75 20.33 5.5 20.92 7.33 21.33L8.08 19.83C9.92 20.17 11.75 20.17 13.58 19.83L14.33 21.33C16.17 20.92 17.92 20.33 19.58 19.58C20.58 17.08 21.08 14.58 21.08 12.08C20.92 9.78 20.4 7.52 19.27 5.33ZM8.33 17.17C7.08 17.17 6.08 16.33 6.08 15.33C6.08 14.33 7.08 13.5 8.33 13.5C9.58 13.5 10.58 14.33 10.58 15.33C10.58 16.33 9.58 17.17 8.33 17.17ZM15.67 17.17C14.42 17.17 13.42 16.33 13.42 15.33C13.42 14.33 14.42 13.5 15.67 13.5C16.92 13.5 17.92 14.33 17.92 15.33C17.92 16.33 16.92 17.17 15.67 17.17Z"/>
+            </svg>
+        </span>
+        <span id="tiktok-icon" title="TikTok">
+            <svg viewBox="0 0 24 24">
+                <path d="M9.5 3v12.5c0 1.93-1.57 3.5-3.5 3.5S2.5 17.43 2.5 15.5 4.07 12 6 12V9c-3.87 0-7 3.13-7 7s3.13 7 7 7 7-3.13 7-7V8.5c0-.55.45-1 1-1s1 .45 1 1v6.5c0 1.93-1.57 3.5-3.5 3.5S10 16.93 10 15V3h-1.5ZM21.5 6.5c-.55 0-1 .45-1 1v6.5c0 1.93-1.57 3.5-3.5 3.5S13.5 15.93 13.5 14V5.5c0-.55.45-1 1-1s1 .45 1 1v8.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V8.5c0-.55.45-1 1-1s1 .45 1 1v5.5c0 1.93-1.57 3.5-3.5 3.5S13 15.93 13 14V3.5c0-.55.45-1 1-1s1 .45 1 1v10.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V7.5c0-.55.45-1 1-1s1 .45 1 1v6.5c0 1.93-1.57 3.5-3.5 3.5S16 16.93 16 15V6.5c0-.55.45-1 1-1s1 .45 1 1v8.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V6.5c0-.55.45-1 1-1Z"/>
+            </svg>
+        </span>
+    </div>
+
+    <div class="stats-bar">
+        <span>👁 <span id="views-count">0</span></span>
+        <div class="like-btn" id="like-btn" onclick="addLike()">
+            <span>❤️</span>
+            <span id="likes-count">0</span>
+        </div>
+    </div>
+
+    <div class="music-card">
+        <div class="music-icon">🎵</div>
+        <div class="music-info">
+            <div class="music-name" id="music-name">Song Name</div>
+            <div class="music-duration" id="music-duration">0:00 — 0:00</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+        </div>
+        <div class="play-btn" id="play-btn" onclick="togglePlay()">▶</div>
+    </div>
+</div>
+
+<audio id="music-player" preload="metadata" loop>
+<script>
+// === LOGIN CONFIG ===
+const DISCORD_CLIENT_ID = "1552714741347127337";
+const GOOGLE_CLIENT_ID = "35904855337-0h7ggkf0octlusqlpntk8lsm0gocckqq.apps.googleusercontent.com"; // 📌 Palitan mo ito!
+const REDIRECT_URI = window.location.origin + window.location.pathname;
+let currentUser = null;
+let profileData = {};
+let isPlaying = false;
+
+// === DEFAULT PROFILE ===
+const DEFAULT_EMPTY = {
+    bgVideo: '', avatar: '', username: '', title: '',
+    info1: '', info2: '', musicUrl: '', musicName: '',
+    mainColor: '#00ff88', textEffect: 'none', fontStyle: 'orbitron',
+    frameStyle: '4', discord: '', tiktok: ''
+};
+
+// --- DISCORD LOGIN ---
+function discordLogin() {
+    const authUrl = "https://discord.com/oauth2/authorize"
+        + "?client_id=" + DISCORD_CLIENT_ID
+        + "&response_type=token"
+        + "&scope=identify%20email"
+        + "&redirect_uri=" + encodeURIComponent(REDIRECT_URI)
+        + "&prompt=consent";
+    window.location.href = authUrl;
+}
+
+// --- GOOGLE LOGIN ---
+function googleLogin() {
+    if (GOOGLE_CLIENT_ID === "YOUR_GOOGLE_CLIENT_ID_HERE") {
+        alert("⚠️ Need Google Client ID first!\nGet free at: console.cloud.google.com\nReplace YOUR_GOOGLE_CLIENT_ID_HERE");
+        return;
+    }
+    const authUrl = "https://accounts.google.com/o/oauth2/v2/auth"
+        + "?client_id=" + GOOGLE_CLIENT_ID
+        + "&response_type=token"
+        + "&scope=https://www.googleapis.com/auth/userinfo.profile%20https://www.googleapis.com/auth/userinfo.email"
+        + "&redirect_uri=" + encodeURIComponent(REDIRECT_URI)
+        + "&prompt=consent";
+    window.location.href = authUrl;
+}
+
+// --- READ LOGIN DATA ---
+function getAuthFromUrl() {
+    const hash = window.location.hash.substring(1);
+    if (!hash) return false;
+    
+    const params = new URLSearchParams(hash);
+    const token = params.get("access_token");
+    if (!token) return false;
+    
+    history.replaceState(null, '', REDIRECT_URI);
+    
+    // Try Discord first
+    fetch("https://discord.com/api/users/@me", {
+        headers: { Authorization: "Bearer " + token }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.id) {
+            let uname = data.username;
+            if (data.discriminator && data.discriminator !== "0") {
+                uname += "#" + data.discriminator;
+            }
+            currentUser = {
+                id: 'discord_' + data.id,
+                provider: 'discord',
+                username: uname,
+                avatar: data.avatar,
+                email: data.email || ""
+            };
+            localStorage.setItem("current_user", JSON.stringify(currentUser));
+            loadUserData();
+        }
+    })
+    .catch(() => {
+        // Try Google instead
+        fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+            headers: { Authorization: "Bearer " + token }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.sub) {
+                currentUser = {
+                    id: 'google_' + data.sub,
+                    provider: 'google',
+                    username: data.name || data.email?.split('@')[0] || 'User',
+                    avatar: data.picture || '',
+                    email: data.email || ""
+                };
+                localStorage.setItem("current_user", JSON.stringify(currentUser));
+                loadUserData();
+            }
+        })
+        .catch(() => alert("❌ Login failed — try again"));
+    });
+    return true;
+}
+
+function checkSavedAuth() {
+    const saved = localStorage.getItem("current_user");
+    if (saved) {
+        currentUser = JSON.parse(saved);
+        loadUserData();
+        return true;
+    }
+    return false;
+}
+
+function loadUserData() {
+    if (!currentUser) return;
+    
+    const saved = localStorage.getItem("profile_" + currentUser.id);
+    if (saved) {
+        profileData = JSON.parse(saved);
+    } else {
+        profileData = { ...DEFAULT_EMPTY };
+        profileData.username = currentUser.username;
+    }
+    
+    document.getElementById("auth-screen").classList.add("hidden");
+    document.getElementById("profile-content").style.display = "flex";
+    document.getElementById("edit-toggle").style.display = "block";
+    document.getElementById("logout-btn").style.display = "block";
+    
+    renderProfile();
+}
+
+function logout() {
+    if (confirm("🚪 Logout?")) {
+        localStorage.removeItem("current_user");
+        location.reload();
+    }
+}
+// === PROFILE RENDER ===
+function renderProfile() {
+    const c = profileData.mainColor || '#00ff88';
+    document.getElementById('avatar-glow').style.background = c;
+    document.getElementById('avatar-glow').style.boxShadow = `0 0 30px ${c}, 0 0 60px ${c}`;
+    document.querySelector('.progress-fill').style.background = c;
+
+    const av = document.getElementById('avatar');
+    const miniAv = document.getElementById('mini-avatar');
+    let avatarUrl = profileData.avatar;
+    
+    if (!avatarUrl && currentUser?.avatar) {
+        if (currentUser.provider === 'discord') {
+            avatarUrl = "https://cdn.discordapp.com/avatars/" 
+                + currentUser.id.replace('discord_','') + "/" 
+                + currentUser.avatar + ".png?size=256";
+        } else {
+            avatarUrl = currentUser.avatar;
+        }
+    }
+    
+    if (avatarUrl) {
+        av.innerHTML = `<img src="${avatarUrl}" alt="avatar">`;
+        miniAv.innerHTML = `<img src="${avatarUrl}" alt="avatar">`;
+        miniAv.style.borderColor = c;
+    } else {
+        av.innerHTML = `<span class="avatar-placeholder">No Image</span>`;
+        miniAv.innerHTML = `<span class="mini-placeholder">?</span>`;
+        miniAv.style.borderColor = 'rgba(255,255,255,0.2)';
+    }
+
+    av.className = 'avatar';
+    if (profileData.frameStyle === '1') { av.classList.add('avatar-frame-1'); av.style.borderColor = c; }
+    else if (profileData.frameStyle === '2') { av.classList.add('avatar-frame-2'); av.style.color = c; }
+    else if (profileData.frameStyle === '3') { av.classList.add('avatar-frame-3'); av.style.color = c; }
+    else if (profileData.frameStyle === '4') { av.classList.add('avatar-frame-4'); }
+
+    const un = document.getElementById('username');
+    un.className = 'username';
+    un.classList.add(`font-${profileData.fontStyle || 'orbitron'}`);
+    un.classList.remove('text-neon', 'text-metallic');
+    const displayName = profileData.username || currentUser?.username || 'User';
+    un.textContent = displayName;
+    un.style.color = c; un.style.opacity = '1';
+    if (profileData.textEffect === 'neon') un.classList.add('text-neon');
+    else if (profileData.textEffect === 'metallic') un.classList.add('text-metallic');
+
+    const titleEl = document.getElementById('title');
+    titleEl.textContent = profileData.title || 'Welcome to my profile!';
+    titleEl.style.opacity = profileData.title ? '0.9' : '0.5';
+
+    document.getElementById('info1').textContent = profileData.info1 || 'Customize me!';
+    document.getElementById('info2').textContent = profileData.info2 || 'Click ⚙ to edit';
+
+    const vid = document.getElementById('bg-video');
+    if (profileData.bgVideo) {
+        vid.src = profileData.bgVideo; vid.style.display = 'block';
+        document.getElementById('bg-placeholder').style.display = 'none';
+        vid.play().catch(() => {});
+    } else {
+        vid.style.display = 'none';
+        document.getElementById('bg-placeholder').style.display = 'block';
+    }
+
+    const player = document.getElementById('music-player');
+    if (profileData.musicUrl) {
+        player.src = profileData.musicUrl; player.volume = 0.5;
+        document.getElementById('music-name').textContent = profileData.musicName || 'Music';
+        document.getElementById('music-name').style.opacity = '1';
+        document.querySelector('.music-icon').style.opacity = '1';
+    } else {
+        player.removeAttribute('src');
+        document.getElementById('music-name').textContent = 'Add music URL';
+        document.getElementById('music-name').style.opacity = '0.4';
+        document.querySelector('.music-icon').style.opacity = '0.4';
+        isPlaying = false; document.getElementById('play-btn').textContent = '▶';
+    }
+
+    const dcIcon = document.getElementById('discord-icon');
+    const ttIcon = document.getElementById('tiktok-icon');
+    dcIcon.style.color = profileData.discord ? c : 'rgba(255,255,255,0.3)';
+    ttIcon.style.color = profileData.tiktok ? c : 'rgba(255,255,255,0.3)';
+    dcIcon.onclick = profileData.discord ? () => window.open(profileData.discord, '_blank') : null;
+    ttIcon.onclick = profileData.tiktok ? () => window.open(profileData.tiktok, '_blank') : null;
+
+    document.getElementById('views-count').textContent = views;
+    document.getElementById('likes-count').textContent = likes;
+
+    document.getElementById('in-bg-video').value = profileData.bgVideo || '';
+    document.getElementById('in-avatar').value = profileData.avatar || '';
+    document.getElementById('in-username').value = profileData.username || '';
+    document.getElementById('in-title').value = profileData.title || '';
+    document.getElementById('in-info1').value = profileData.info1 || '';
+    document.getElementById('in-info2').value = profileData.info2 || '';
+    document.getElementById('in-music-url').value = profileData.musicUrl || '';
+    document.getElementById('in-music-name').value = profileData.musicName || '';
+    document.getElementById('in-main-color').value = profileData.mainColor || '#00ff88';
+    document.getElementById('in-text-effect').value = profileData.textEffect || 'none';
+    document.getElementById('in-font-style').value = profileData.fontStyle || 'orbitron';
+    document.getElementById('in-frame-style').value = profileData.frameStyle || '4';
+    document.getElementById('in-discord').value = profileData.discord || '';
+    document.getElementById('in-tiktok').value = profileData.tiktok || '';
+}
+
+// === SAVE & SETTINGS ===
+function toggleSettings() {
+    const p = document.getElementById('settings-panel');
+    p.style.display = p.style.display === 'block' ? 'none' : 'block';
+}
+
+function saveProfile() {
+    if (!currentUser) return alert('Login first!');
+    
+    profileData.bgVideo = document.getElementById('in-bg-video').value.trim();
+    profileData.avatar = document.getElementById('in-avatar').value.trim();
+    profileData.username = document.getElementById('in-username').value.trim();
+    profileData.title = document.getElementById('in-title').value.trim();
+    profileData.info1 = document.getElementById('in-info1').value.trim();
+    profileData.info2 = document.getElementById('in-info2').value.trim();
+    profileData.musicUrl = document.getElementById('in-music-url').value.trim();
+    profileData.musicName = document.getElementById('in-music-name').value.trim();
+    profileData.mainColor = document.getElementById('in-main-color').value;
+    profileData.textEffect = document.getElementById('in-text-effect').value;
+    profileData.fontStyle = document.getElementById('in-font-style').value;
+    profileData.frameStyle = document.getElementById('in-frame-style').value;
+    profileData.discord = document.getElementById('in-discord').value.trim();
+    profileData.tiktok = document.getElementById('in-tiktok').value.trim();
+
+    localStorage.setItem('profile_' + currentUser.id, JSON.stringify(profileData));
+    renderProfile(); toggleSettings(); alert('✅ Saved!');
+}
+
+function resetProfile() {
+    if (!confirm('🔄 Clear your profile?')) return;
+    profileData = { ...DEFAULT_EMPTY };
+    localStorage.setItem('profile_' + currentUser.id, JSON.stringify(profileData));
+    renderProfile(); toggleSettings(); alert('✅ Reset!');
+}
+
+// === LIKES & VIEWS ===
+let views = parseInt(localStorage.getItem('profile_views') || '0');
+let likes = parseInt(localStorage.getItem('profile_likes') || '0');
+const visitorId = localStorage.getItem('profile_vid') || (() => {
+    const id = 'v_' + Math.random().toString(36).slice(2, 10);
+    localStorage.setItem('profile_vid', id); return id;
+})();
+const hasViewed = localStorage.getItem('viewed_' + visitorId);
+const hasLiked = localStorage.getItem('liked_' + visitorId);
+
+if (!hasViewed) {
+    views++; localStorage.setItem('profile_views', views);
+    localStorage.setItem('viewed_' + visitorId, 'yes');
+}
+if (hasLiked) document.getElementById('like-btn')?.classList.add('liked');
+
+function addLike() {
+    if (localStorage.getItem('liked_' + visitorId)) { 
+        alert('You already liked this! ❤️'); return; 
+    }
+    likes++; localStorage.setItem('profile_likes', likes);
+    localStorage.setItem('liked_' + visitorId, 'yes');
+    document.getElementById('likes-count').textContent = likes;
+    document.getElementById('like-btn').classList.add('liked');
+}
+
+// === MUSIC ===
+function togglePlay() {
+    if (!profileData.musicUrl) { alert('Add music URL first! 🎵'); return; }
+    if (isPlaying) { 
+        document.getElementById('music-player').pause(); 
+        document.getElementById('play-btn').textContent = '▶'; 
+    } else { 
+        document.getElementById('music-player').play(); 
+        document.getElementById('play-btn').textContent = '⏸'; 
+    }
+    isPlaying = !isPlaying;
+}
+
+document.getElementById('music-player').ontimeupdate = function() {
+    const p = document.getElementById('music-player');
+    const curr = isNaN(p.currentTime) ? '0:00' : 
+        Math.floor(p.currentTime/60) + ':' + (Math.floor(p.currentTime%60)<10?'0':'') + Math.floor(p.currentTime%60);
+    const dur = isNaN(p.duration) ? '0:00' : 
+        Math.floor(p.duration/60) + ':' + (Math.floor(p.duration%60)<10?'0':'') + Math.floor(p.duration%60);
+    document.getElementById('music-duration').textContent = curr + ' — ' + dur;
+    document.getElementById('progress-fill').style.width = p.duration ? 
+        (p.currentTime / p.duration) * 100 + '%' : '0%';
+};
+
+// === STARS BACKGROUND ===
+function createStars() {
+    const container = document.getElementById('stars-container');
+    const symbols = ['*', '✦', '✧', '☆', '✦'];
+    for (let i = 0; i < 35; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.animationDelay = Math.random() * 4 + 's';
+        container.appendChild(star);
+    }
+}
+
+// === START ===
+createStars();
+const fromUrl = getAuthFromUrl();
+if (!fromUrl) checkSavedAuth();
+</script>
+</body>
+</html>
