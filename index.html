@@ -159,9 +159,7 @@
 
     <div style="margin-top:20px;text-align:center;color:#888;font-size:13px;">— or continue with —</div>
     <div style="display:flex;gap:10px;margin-top:15px;">
-      <button onclick="discordLogin()" style="flex:1;padding:10px;background:#5865F2;color:#fff;border:none;border-radius:8px;cursor:pointer;">Discord</button>
-      <button onclick="googleLogin()" style="flex:1;padding:10px;background:#ea4335;color:#fff;border:none;border-radius:8px;cursor:pointer;">Google</button>
-    </div>
+      <button onclick="discordLogin()" style="flex:1;padding:10px;background:#5865F2;color:#fff;border:none;border-radius:8px;cursor:pointer;">Discord</button
   </div>
 </div>
     
@@ -666,8 +664,10 @@ function showTab(name) {
 function createAccount() {
   const user = document.getElementById('new-username').value.trim();
   const pass = document.getElementById('new-password').value;
+  
   if (!user || !pass) return alert('❌ Fill all fields!');
   if (user.length < 3) return alert('❌ Username at least 3 characters!');
+  if (pass.length < 4) return alert('❌ Password at least 4 characters!');
   
   const accounts = JSON.parse(localStorage.getItem('prism_accounts') || '{}');
   if (accounts[user]) return alert('❌ Username already taken!');
@@ -675,21 +675,33 @@ function createAccount() {
   accounts[user] = { password: pass };
   localStorage.setItem('prism_accounts', JSON.stringify(accounts));
   localStorage.setItem('prism_active_user', user);
+  
   alert(`✅ Account created! Welcome, ${user}!`);
-  enterProfile(user);
+  goToProfile(user);
 }
 
 function signIn() {
   const user = document.getElementById('login-username').value.trim();
   const pass = document.getElementById('login-password').value;
+  
   const accounts = JSON.parse(localStorage.getItem('prism_accounts') || '{}');
-  if (!accounts[user]) return alert('❌ Account not found!');
+  if (!accounts[user]) return alert('❌ Account not found! Create one first.');
   if (accounts[user].password !== pass) return alert('❌ Wrong password!');
   
   localStorage.setItem('prism_active_user', user);
   alert(`✅ Welcome back, ${user}!`);
-  enterProfile(user);
+  goToProfile(user);
 }
+
+function goToProfile(username) {
+  document.getElementById('auth-screen').style.display = 'none';
+  currentUser = { id: 'local-' + username, name: username, provider: 'local' };
+  const saved = localStorage.getItem('profile_' + username);
+  if (saved) profileData = JSON.parse(saved);
+  if (typeof loadUser === 'function') loadUser();
+  if (typeof renderProfile === 'function') renderProfile();
+}
+
 
 function enterProfile(username) {
   currentUser = { id: 'local-' + username, name: username, provider: 'local' };
