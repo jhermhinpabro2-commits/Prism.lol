@@ -342,7 +342,7 @@
     </div>
 </div>
 
-<audio id="music-player" preload="auto" loop>
+<audio id="music-player" preload="auto" loop autoplay>
 <script>
 // === LOGIN CONFIG ===
 const DISCORD_CLIENT_ID = "1552714741347127337";
@@ -687,5 +687,20 @@ createStars();
 const fromUrl = getAuthFromUrl();
 if (!fromUrl) checkSavedAuth();
 </script>
+    <script>
+window.addEventListener('load', function() {
+  const player = document.getElementById('music-player');
+  
+  // Subukan mag-play agad
+  player.play().catch(function() {
+    // Kung hindi pwede — unang pindot lang → tugtog na!
+    document.addEventListener('click', function() {
+      player.play();
+    }, { once: true });
+  });
+});
+        
+    </script>
+    
 </body>
 </html>
