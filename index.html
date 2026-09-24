@@ -238,13 +238,22 @@
         </div>
     </div>
 </div>
-<div class="content" id="profile-content" style="display:none;">
-    <div class="avatar-wrap">
-        <div class="avatar-glow" id="avatar-glow"></div>
-        <div class="avatar" id="avatar">
-            <span class="avatar-placeholder">Loading...</span>
-        </div>
-    </div>
+<!-- ✅ PROFILE VIEW — ITO ANG LALABAS AGAD -->
+<div id="profile-content" style="display:none;">
+  <!-- Dito lumalabas yung ganyang itsura katulad sa litrato: avatar, pangalan, date, music, etc. -->
+  
+  <button id="edit-profile-btn" onclick="toggleSettings()" style="position:fixed;top:15px;right:15px;padding:8px 16px;background:rgba(255,255,255,0.1);color:#fff;border:none;border-radius:20px;backdrop-filter:blur(10px);cursor:pointer;">
+    ⚙️ Edit Profile
+  </button>
+  
+  <!-- Dito yung profile display — avatar, title, info, music, stats, etc. -->
+</div>
+
+<!-- ✅ EDIT PROFILE FORM — NAKATAGO MUNA HANGGANG HINDI PININDUT -->
+<div id="settings-panel" style="display:none;">
+  <!-- Dito yung lahat ng input fields — username, color, links, etc. -->
+</div>
+
 
     <h1 class="username" id="username">Username</h1>
     <p class="title" id="title">Title / Motto</p>
@@ -540,8 +549,18 @@ function renderProfile() {
 
 // === SAVE & SETTINGS ===
 function toggleSettings() {
-    const p = document.getElementById('settings-panel');
-    p.style.display = p.style.display === 'block' ? 'none' : 'block';
+  const profileView = document.getElementById('profile-content');
+  const editForm = document.getElementById('settings-panel');
+  
+  // Magpalit sa pagitan ng View ↔ Edit
+  if (editForm.style.display === 'none') {
+    profileView.style.display = 'none';
+    editForm.style.display = 'block';
+  } else {
+    editForm.style.display = 'none';
+    profileView.style.display = 'block';
+    renderProfile(); // I-refresh ang view pagkatapos mag-edit
+  }
 }
 
 function saveProfile() {
@@ -713,13 +732,24 @@ function goToProfile(username) {
 
 
 function enterProfile(username) {
-  currentUser = { id: 'local-' + username, name: username, provider: 'local' };
+  // Itago ang login screen
   document.getElementById('auth-screen').style.display = 'none';
-  // Load saved profile if exists
+  
+  // Set current user
+  currentUser = { id: 'local-' + username, name: username, provider: 'local' };
+  
+  // Load saved profile data
   const saved = localStorage.getItem('profile_' + username);
   if (saved) profileData = JSON.parse(saved);
-  // Call your existing profile load function here
+  
+  // ✅ IPakita agad ang PROFILE VIEW, hindi Edit Form
+  document.getElementById('profile-content').style.display = 'block';
+  document.getElementById('settings-panel').style.display = 'none'; // Itago ang Edit form
+  
+  // Ipakita ang profile
+  if (typeof renderProfile === 'function') renderProfile();
 }
+        
 let currentUser = null;
 let profileData = {};
 
