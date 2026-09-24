@@ -134,34 +134,41 @@
     </style>
 </head>
 <body>
-  <!-- ──────────── LOGIN / CREATE ACCOUNT ──────────── -->
-<div id="auth-screen" style="position:fixed;inset:0;background:rgba(0,0,0,0.95);display:flex;align-items:center;justify-content:center;z-index:9999;">
-  <div style="background:#1a1a2e;padding:30px;border-radius:16px;box-shadow:0 0 30px rgba(121,40,202,0.3);width:90%;max-width:400px;">
-    <h2 style="color:#fff;text-align:center;margin-bottom:8px;font-size:24px;">Welcome to Prism.lol</h2>
-    <p style="color:#888;text-align:center;font-size:12px;margin-bottom:25px;">Made by Jher</p>
-    
-    <div style="display:flex;gap:10px;margin-bottom:20px;">
-      <button id="tab-login" onclick="showTab('login')" style="flex:1;padding:10px;background:#7928ca;color:#fff;border:none;border-radius:8px;cursor:pointer;">Sign In</button>
-      <button id="tab-register" onclick="showTab('register')" style="flex:1;padding:10px;background:transparent;color:#999;border:1px solid #444;border-radius:8px;cursor:pointer;">Create Account</button>
+<!-- ──────────── LOGIN SCREEN ──────────── -->
+<div id="auth-screen" style="position:fixed;inset:0;background:rgba(0,0,0,0.97);display:flex;align-items:center;justify-content:center;z-index:9999;">
+  <div style="background:#12121f;padding:30px;border-radius:20px;box-shadow:0 0 40px rgba(121,40,202,0.25);width:90%;max-width:420px;">
+    <h2 style="color:#fff;text-align:center;margin:0 0 5px 0;font-size:26px;">Prism.lol</h2>
+    <p style="color:#666;text-align:center;margin:0 0 25px 0;font-size:13px;">Made by Jher</p>
+
+    <!-- TABS -->
+    <div style="display:flex;gap:8px;margin-bottom:20px;">
+      <button id="tab-signin" onclick="showAuthTab('signin')" style="flex:1;padding:11px;background:#7928ca;color:#fff;border:none;border-radius:10px;font-weight:bold;cursor:pointer;">Sign In</button>
+      <button id="tab-create" onclick="showAuthTab('create')" style="flex:1;padding:11px;background:transparent;color:#777;border:1px solid #333;border-radius:10px;cursor:pointer;">Create Account</button>
     </div>
 
-    <div id="form-register">
-      <input type="text" id="new-username" placeholder="Username" style="width:100%;padding:12px;margin-bottom:12px;background:#2a2a3e;border:none;border-radius:8px;color:#fff;">
-      <input type="password" id="new-password" placeholder="Password" style="width:100%;padding:12px;margin-bottom:12px;background:#2a2a3e;border:none;border-radius:8px;color:#fff;">
-      <button onclick="createAccount()" style="width:100%;padding:12px;background:linear-gradient(135deg,#7928ca,#ff0080);color:#fff;border:none;border-radius:8px;font-weight:bold;cursor:pointer;">✨ Create Account</button>
+    <!-- CREATE ACCOUNT FORM -->
+    <div id="form-create">
+      <input type="text" id="new-user" placeholder="Username" style="width:100%;padding:14px;margin-bottom:12px;background:#1e1e2f;border:none;border-radius:10px;color:#fff;font-size:15px;">
+      <input type="password" id="new-pass" placeholder="Password" style="width:100%;padding:14px;margin-bottom:16px;background:#1e1e2f;border:none;border-radius:10px;color:#fff;font-size:15px;">
+      <button onclick="doCreateAccount()" style="width:100%;padding:14px;background:linear-gradient(135deg,#7928ca,#ff0080);color:#fff;border:none;border-radius:10px;font-weight:bold;font-size:15px;cursor:pointer;">✨ Create Account</button>
     </div>
 
-    <div id="form-login" style="display:none;">
-      <input type="text" id="login-username" placeholder="Username" style="width:100%;padding:12px;margin-bottom:12px;background:#2a2a3e;border:none;border-radius:8px;color:#fff;">
-      <input type="password" id="login-password" placeholder="Password" style="width:100%;padding:12px;margin-bottom:12px;background:#2a2a3e;border:none;border-radius:8px;color:#fff;">
-      <button onclick="signIn()" style="width:100%;padding:12px;background:#4f46e5;color:#fff;border:none;border-radius:8px;font-weight:bold;cursor:pointer;">🔑 Sign In</button>
+    <!-- SIGN IN FORM -->
+    <div id="form-signin" style="display:none;">
+      <input type="text" id="login-user" placeholder="Username" style="width:100%;padding:14px;margin-bottom:12px;background:#1e1e2f;border:none;border-radius:10px;color:#fff;font-size:15px;">
+      <input type="password" id="login-pass" placeholder="Password" style="width:100%;padding:14px;margin-bottom:16px;background:#1e1e2f;border:none;border-radius:10px;color:#fff;font-size:15px;">
+      <button onclick="doSignIn()" style="width:100%;padding:14px;background:#4f46e5;color:#fff;border:none;border-radius:10px;font-weight:bold;font-size:15px;cursor:pointer;">🔑 Sign In</button>
     </div>
 
-    <div style="margin-top:20px;text-align:center;color:#888;font-size:13px;">— or continue with —</div>
-    <div style="display:flex;gap:10px;margin-top:15px;">
-      <button onclick="discordLogin()" style="flex:1;padding:10px;background:#5865F2;color:#fff;border:none;border-radius:8px;cursor:pointer;">Discord</button
+    <div style="text-align:center;margin:20px 0 12px 0;color:#555;font-size:13px;">— or —</div>
+
+    <!-- DISCORD LOGIN -->
+    <button onclick="discordLogin()" style="width:100%;padding:13px;background:#5865F2;color:#fff;border:none;border-radius:10px;font-weight:bold;cursor:pointer;">
+      🎮 Login with Discord
+    </button>
   </div>
 </div>
+
     
 
 <div class="bg-container">
@@ -711,6 +718,85 @@ function enterProfile(username) {
   if (saved) profileData = JSON.parse(saved);
   // Call your existing profile load function here
 }
+        let currentUser = null;
+let profileData = {};
+
+// Switch tabs
+function showAuthTab(tab) {
+  const isSignin = tab === 'signin';
+  document.getElementById('form-signin').style.display = isSignin ? 'block' : 'none';
+  document.getElementById('form-create').style.display = isSignin ? 'none' : 'block';
+  document.getElementById('tab-signin').style.background = isSignin ? '#7928ca' : 'transparent';
+  document.getElementById('tab-signin').style.color = isSignin ? '#fff' : '#777';
+  document.getElementById('tab-signin').style.border = isSignin ? 'none' : '1px solid #333';
+  document.getElementById('tab-create').style.background = isSignin ? 'transparent' : '#7928ca';
+  document.getElementById('tab-create').style.color = isSignin ? '#777' : '#fff';
+  document.getElementById('tab-create').style.border = isSignin ? '1px solid #333' : 'none';
+}
+
+// Create Account → then go to Profile
+function doCreateAccount() {
+  const u = document.getElementById('new-user').value.trim();
+  const p = document.getElementById('new-pass').value;
+  
+  if (!u || !p) return alert('❌ Please fill in all fields!');
+  if (u.length < 3) return alert('❌ Username must be at least 3 characters!');
+  if (p.length < 4) return alert('❌ Password must be at least 4 characters!');
+  
+  const accounts = JSON.parse(localStorage.getItem('prism_accounts') || '{}');
+  if (accounts[u]) return alert('❌ Username already exists! Sign in instead.');
+  
+  accounts[u] = { password: p };
+  localStorage.setItem('prism_accounts', JSON.stringify(accounts));
+  localStorage.setItem('prism_active_user', u);
+  
+  alert(`✅ Account created!\nWelcome, ${u}!`);
+  enterProfile(u);
+}
+
+// Sign In → then go to Profile
+function doSignIn() {
+  const u = document.getElementById('login-user').value.trim();
+  const p = document.getElementById('login-pass').value;
+  
+  const accounts = JSON.parse(localStorage.getItem('prism_accounts') || '{}');
+  if (!accounts[u]) return alert('❌ Account not found! Create one first.');
+  if (accounts[u].password !== p) return alert('❌ Incorrect password!');
+  
+  localStorage.setItem('prism_active_user', u);
+  alert(`✅ Welcome back, ${u}!`);
+  enterProfile(u);
+}
+
+// Hide login screen & show profile
+function enterProfile(username) {
+  // 🔒 Hide login — only show profile after login
+  document.getElementById('auth-screen').style.display = 'none';
+  
+  // Set user
+  currentUser = { id: 'local-' + username, name: username, provider: 'local' };
+  
+  // Load saved profile data
+  const saved = localStorage.getItem('profile_' + username);
+  if (saved) profileData = JSON.parse(saved);
+  
+  // Show profile / edit page
+  if (typeof loadUser === 'function') loadUser();
+  if (typeof renderProfile === 'function') renderProfile();
+}
+
+// Check if already logged in when page loads
+window.addEventListener('load', function() {
+  const activeUser = localStorage.getItem('prism_active_user');
+  if (activeUser) {
+    // Auto-login if already signed in before
+    const accounts = JSON.parse(localStorage.getItem('prism_accounts') || '{}');
+    if (accounts[activeUser]) {
+      enterProfile(activeUser);
+    }
+  }
+});
+        
     </script>
     
 </body>
